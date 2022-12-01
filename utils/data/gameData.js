@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { clientCredentials } from '../client';
 
 const getGames = () => new Promise((resolve, reject) => {
@@ -48,10 +47,20 @@ const updateGame = (game, id) => new Promise((resolve, reject) => {
     .catch(reject);
 });
 
+const deleteGame = (id) => new Promise((resolve, reject) => {
+  fetch(`${clientCredentials.databaseURL}/games/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  })
+    .then((response) => resolve(response))
+    .catch((error) => reject(error));
+});
+
 export {
   getGames,
   createGame,
   getGameTypes,
   updateGame,
   getGameById,
+  deleteGame,
 };

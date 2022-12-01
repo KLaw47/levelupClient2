@@ -7,8 +7,13 @@ import { getGames } from '../../utils/data/gameData';
 function Home() {
   const [games, setGames] = useState([]);
   const router = useRouter();
-  useEffect(() => {
+
+  const getContent = () => {
     getGames().then((data) => setGames(data));
+  };
+
+  useEffect(() => {
+    getContent();
   }, []);
 
   return (
@@ -25,7 +30,7 @@ function Home() {
       </h2>
       {games.map((game) => (
         <section key={`game--${game.id}`} className="game">
-          <GameCard title={game.title} maker={game.maker} numberOfPlayers={game.number_of_players} skillLevel={game.skill_level} />
+          <GameCard title={game.title} maker={game.maker} numberOfPlayers={game.number_of_players} id={game.id} skillLevel={game.skill_level} onUpdate={getContent} />
         </section>
       ))}
     </article>

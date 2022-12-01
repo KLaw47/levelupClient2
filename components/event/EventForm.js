@@ -6,26 +6,20 @@ import { Button, Form } from 'react-bootstrap';
 import { createEvent, updateEvent } from '../../utils/data/eventData';
 import { getGames } from '../../utils/data/gameData';
 
-const initialState = {
-  description: '',
-  date: '',
-  time: '',
-  game: 0,
-};
-const EventForm = ({ obj, user }) => {
+const EventForm = ({ user, obj }) => {
   const [games, setGames] = useState([]);
-  const [currentEvent, setCurrentEvent] = useState(initialState);
+  const [currentEvent, setCurrentEvent] = useState({
+    game: null,
+    description: '',
+    date: '',
+    time: '',
+    organizer: user.uid,
+  });
   const router = useRouter();
-  console.warn(obj);
-  const getGamesSetForm = () => {
-    if (obj.id) {
-      setCurrentEvent(obj);
-    }
-    getGames().then(setGames);
-  };
 
   useEffect(() => {
-    getGamesSetForm();
+    getGames().then(setGames);
+    if (obj?.id) setCurrentEvent(obj);
   }, [obj]);
 
   const handleChange = (e) => {
@@ -39,17 +33,17 @@ const EventForm = ({ obj, user }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const event = {
-      description: currentEvent.description,
-      date: currentEvent.date,
-      time: currentEvent.time,
-      game: Number(currentEvent.game),
-      user_id: user.uid,
-    };
-    if (obj.id) {
-      const gameId = { ...currentEvent, game_id: currentEvent.game };
-      updateEvent(gameId).then(() => router.push('/events'));
+    if (obj?.id) {
+      updateEvent(currentEvent, obj.id)
+        .then(() => router.push('/events'));
     } else {
+      const event = {
+        game: currentEvent.game,
+        description: currentEvent.description,
+        date: currentEvent.date,
+        time: currentEvent.time,
+        organizer: user.uid,
+      };
       createEvent(event).then(() => router.push('/events'));
     }
   };
@@ -66,7 +60,7 @@ const EventForm = ({ obj, user }) => {
           <Form.Control name="time" type="time" required value={currentEvent.time} onChange={handleChange} />
           <Form.Select
             aria-label="Game"
-            name="gameId"
+            name="game"
             onChange={handleChange}
             className="mb-3"
             value={currentEvent.gameId}
@@ -75,11 +69,9 @@ const EventForm = ({ obj, user }) => {
             <option value="">Select Game</option>
             {
               games.map((game) => (
-                <option
-                  key={game.id}
-                  value={game.id}
-                  label={game.title}
-                />
+                <option defaultValue={game.id === currentEvent.game} key={game.title} value={game.id}>
+                  {game.title}
+                </option>
               ))
             }
           </Form.Select>
@@ -93,20 +85,15 @@ const EventForm = ({ obj, user }) => {
 };
 
 EventForm.propTypes = {
+  user: PropTypes.shape({
+    uid: PropTypes.string,
+    fbUser: PropTypes.shape({
+      displayName: PropTypes.string,
+    }).isRequired,
+  }).isRequired,
   obj: PropTypes.shape({
     id: PropTypes.number,
-    description: PropTypes.string,
-    date: PropTypes.string,
-    time: PropTypes.string,
-    game: PropTypes.number,
-  }),
-  user: PropTypes.shape({
-    uid: PropTypes.string.isRequired,
   }).isRequired,
-};
-
-EventForm.defaultProps = {
-  obj: initialState,
 };
 
 export default EventForm;
