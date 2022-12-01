@@ -16,7 +16,7 @@ const checkUser = (uid) => new Promise((resolve, reject) => {
     .then((resp) => resolve(resp.json()))
     .catch(reject);
 });
-
+// console.warn(clientCredentials.databaseURL);
 const registerUser = (userInfo) => new Promise((resolve, reject) => {
   fetch(`${clientCredentials.databaseURL}/register`, {
     method: 'POST',
